@@ -12,7 +12,6 @@
   ],
   "author": "Vojtech Novak",
   "license": "MIT",
-  "peerDependencies": {},
   "directories": {
     "example": "example"
   },
