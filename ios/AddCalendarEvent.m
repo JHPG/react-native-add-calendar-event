@@ -52,6 +52,7 @@ static NSString *const _endDate = @"endDate";
 static NSString *const _notes = @"notes";
 static NSString *const _url = @"url";
 static NSString *const _allDay = @"allDay";
+static NSString *const _predicate = @"predicate";
 
 static NSString *const MODULE_NAME= @"AddCalendarEvent";
 
@@ -168,10 +169,19 @@ RCT_EXPORT_METHOD(presentEventViewingDialog:(NSDictionary *)options resolver:(RC
     self.resolver = resolve;
     self.rejecter = reject;
     
+    NSDictionary *predicate = nil;
+    
+    if (options[_predicate]) {
+        predicate = @{
+            _startDate: options[_predicate][_startDate],
+            _endDate: options[_predicate][_endDate],
+        };
+    }
     void (^showEventViewingController)(EKEvent *) = ^(EKEvent * event){
         EKEventViewController *controller = [[EKEventViewController alloc] init];
         controller.event = event;
         controller.delegate = self;
+        
         if (options[@"allowsEditing"]) {
             controller.allowsEditing = [RCTConvert BOOL:options[@"allowsEditing"]];
         }
@@ -183,8 +193,8 @@ RCT_EXPORT_METHOD(presentEventViewingDialog:(NSDictionary *)options resolver:(RC
         [self assignNavbarColorsTo:navBar.navigationBar];
         [self presentViewController:navBar];
     };
-    
-    [self runIfAccessGranted:showEventViewingController withEvent:[self getEditedEventInstance]];
+
+    [self runIfAccessGranted:showEventViewingController withEvent:[self getEditedEventInstance:predicate]];
 }
 
 -(void)assignNavbarColorsTo: (UINavigationBar *) navigationBar
@@ -225,8 +235,8 @@ RCT_EXPORT_METHOD(presentEventEditingDialog:(NSDictionary *)options resolver:(RC
         [self assignNavbarColorsTo:controller.navigationBar];
         [self presentViewController:controller];
     };
-    
-    [self runIfAccessGranted:showEventEditingController withEvent:[self getEditedEventInstance]];
+
+    [self runIfAccessGranted:showEventEditingController withEvent:[self getEditedEventInstance:nil]];
 }
 
 - (void)presentViewController: (UIViewController *) controller {
@@ -234,11 +244,28 @@ RCT_EXPORT_METHOD(presentEventEditingDialog:(NSDictionary *)options resolver:(RC
     [self.viewController presentViewController:controller animated:YES completion:nil];
 }
 
-- (nullable EKEvent *)getEditedEventInstance {
+- (nullable EKEvent *)getEditedEventInstance:(nullable NSDictionary*) query {
     EKEvent *maybeEvent = [[self getEventStoreInstance] eventWithIdentifier: _eventOptions[_eventId]];
+    
+    if (query != nil && maybeEvent != nil) {
+        NSDate *startDate = [RCTConvert NSDate:query[_startDate]];
+        NSDate *endDate = [RCTConvert NSDate:query[_endDate]];
+
+        NSPredicate *predicate = [[self getEventStoreInstance] predicateForEventsWithStartDate:startDate endDate:endDate calendars:nil];
+        NSArray<EKEvent*> *events = [[self getEventStoreInstance] eventsMatchingPredicate:predicate];
+
+        for (EKEvent* event in events) {
+            if ([event.eventIdentifier isEqualToString:_eventOptions[_eventId]]) {
+                maybeEvent = event;
+                break;
+            }
+        }
+    }
+
     if (!maybeEvent) {
         maybeEvent = [[self getEventStoreInstance] calendarItemWithIdentifier: _eventOptions[_eventId]];
     }
+
     return maybeEvent;
 }
 
