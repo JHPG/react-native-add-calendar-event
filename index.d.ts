@@ -58,6 +58,11 @@ declare module "react-native-add-calendar-event" {
 
   type CreateResult = SuccessAction | CancelAction;
 
+  interface PredicateOptions {
+    startDate: string;
+    endDate: string;
+  }
+
   interface EditOptions {
     /**
      * Id of edited event.
@@ -70,6 +75,8 @@ declare module "react-native-add-calendar-event" {
      */
     useEditIntent?: boolean;
     navigationBarIOS?: NavigationBarIOS;
+    /** Predicate to filter the event before editing. Useful to select a recurrent event instance. */
+    predicate?: PredicateOptions;
   }
 
   type EditResult = SuccessAction | CancelAction | DeletedAction;
@@ -90,6 +97,8 @@ declare module "react-native-add-calendar-event" {
      */
     allowsCalendarPreview?: boolean;
     navigationBarIOS?: NavigationBarIOS;
+    /** Predicate to filter the event before viewing. Useful to select a recurrent event instance. */
+    predicate?: PredicateOptions;
   }
 
   type ViewResult = DoneAction | RespondedAction | DeletedAction;
