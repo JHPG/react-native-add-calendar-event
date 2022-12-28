@@ -245,7 +245,8 @@ RCT_EXPORT_METHOD(presentEventEditingDialog:(NSDictionary *)options resolver:(RC
 }
 
 - (nullable EKEvent *)getEditedEventInstance:(nullable NSDictionary*) query {
-    EKEvent *maybeEvent = [[self getEventStoreInstance] eventWithIdentifier: _eventOptions[_eventId]];
+    NSString *eventId = self.eventOptions[_eventId];
+    EKEvent *maybeEvent = [[self getEventStoreInstance] eventWithIdentifier: eventId];
     
     if (query != nil && maybeEvent != nil) {
         NSDate *startDate = [RCTConvert NSDate:query[_startDate]];
@@ -255,7 +256,7 @@ RCT_EXPORT_METHOD(presentEventEditingDialog:(NSDictionary *)options resolver:(RC
         NSArray<EKEvent*> *events = [[self getEventStoreInstance] eventsMatchingPredicate:predicate];
 
         for (EKEvent* event in events) {
-            if ([event.eventIdentifier isEqualToString:_eventOptions[_eventId]]) {
+            if ([event.eventIdentifier isEqualToString:eventId] || [event.calendarItemIdentifier isEqualToString:eventId]) {
                 maybeEvent = event;
                 break;
             }
@@ -263,7 +264,7 @@ RCT_EXPORT_METHOD(presentEventEditingDialog:(NSDictionary *)options resolver:(RC
     }
 
     if (!maybeEvent) {
-        maybeEvent = [[self getEventStoreInstance] calendarItemWithIdentifier: _eventOptions[_eventId]];
+        maybeEvent = [[self getEventStoreInstance] calendarItemWithIdentifier: eventId];
     }
 
     return maybeEvent;
