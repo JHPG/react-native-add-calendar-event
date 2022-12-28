@@ -167,15 +167,6 @@ RCT_EXPORT_METHOD(presentEventViewingDialog:(NSDictionary *)options resolver:(RC
     self.eventOptions = options;
     self.resolver = resolve;
     self.rejecter = reject;
-    
-    NSDictionary *predicate = nil;
-    
-    if (options[_predicate]) {
-        predicate = @{
-            _startDate: options[_predicate][_startDate],
-            _endDate: options[_predicate][_endDate],
-        };
-    }
 
     void (^showEventViewingController)(EKEvent *) = ^(EKEvent * event){
         EKEventViewController *controller = [[EKEventViewController alloc] init];
@@ -194,7 +185,7 @@ RCT_EXPORT_METHOD(presentEventViewingDialog:(NSDictionary *)options resolver:(RC
         [self presentViewController:navBar];
     };
 
-    [self runIfAccessGranted:showEventViewingController withEvent:[self getEditedEventInstance:predicate]];
+    [self runIfAccessGranted:showEventViewingController withEvent:[self getEditedEventInstance:options[_predicate]]];
 }
 
 -(void)assignNavbarColorsTo: (UINavigationBar *) navigationBar
@@ -236,7 +227,7 @@ RCT_EXPORT_METHOD(presentEventEditingDialog:(NSDictionary *)options resolver:(RC
         [self presentViewController:controller];
     };
 
-    [self runIfAccessGranted:showEventEditingController withEvent:[self getEditedEventInstance:nil]];
+    [self runIfAccessGranted:showEventEditingController withEvent:[self getEditedEventInstance:options[_predicate]]];
 }
 
 - (void)presentViewController: (UIViewController *) controller {
