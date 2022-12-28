@@ -101,6 +101,7 @@ eventConfig object:
 | eventId               | String  | Id of edited event.                                                                                                                      |
 | allowsEditing         | boolean | iOS only; [docs](https://developer.apple.com/documentation/eventkitui/ekeventviewcontroller/1613964-allowsediting?language=objc)         |
 | allowsCalendarPreview | boolean | iOS only; [docs](https://developer.apple.com/documentation/eventkitui/ekeventviewcontroller/1613956-allowscalendarpreview?language=objc) |
+| predicate             | object?  | iOS only; Query to find an recurrent event. Pass an object with its `startDate` and `endDate`                                            |
 
 ### Interpreting the results
 
